@@ -21,7 +21,7 @@ require 'matrix'
 require 'extendmatrix'
 require 'distribution'
 require 'dirty-memoize'
-require 'reportbuilder'
+# require 'reportbuilder'
 require 'daru'
 require 'statsample/daru'
 
@@ -136,7 +136,7 @@ module Statsample
       class_variable_get(cv)
     end
   end
-  
+
   create_has_library :gsl
 
   SPLIT_TOKEN = ','
@@ -264,7 +264,7 @@ module Statsample
     include GetText
     bindtextdomain('statsample')
     def summary(method = :to_text)
-      ReportBuilder.new(no_title: true).add(self).send(method)
+      # ReportBuilder.new(no_title: true).add(self).send(method)
     end
   end
   module STATSAMPLE__ #:nodoc:

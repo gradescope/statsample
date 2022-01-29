@@ -4,7 +4,7 @@ module Statsample
     # Generates Bootstrap sample to identity the replicability of a Dominance Analysis. See Azen & Bodescu (2003) for more information.
     #
     # == Usage
-    # 
+    #
     # require 'statsample'
     # a = Daru::Vector.new(100.times.collect {rand})
     # b = Daru::Vector.new(100.times.collect {rand})
@@ -18,7 +18,7 @@ module Statsample
     # <strong>Output</strong>
     #   Sample size: 100
     #  t: 1.98421693632958
-    #  
+    #
     #  Linear Regression Engine: Statsample::Regression::Multiple::MatrixEngine
     #  Table: Bootstrap report
     #  --------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ module Statsample
     #  | b - d                 | 1.0 | 0.9700 | 0.171   | 0.970 | 0.030 | 0.000 | 0.970           |
     #  | c - d                 | 1.0 | 0.5600 | 0.499   | 0.560 | 0.440 | 0.000 | 0.560           |
     #  --------------------------------------------------------------------------------------------
-    #  
+    #
     #  Table: General averages
     #  ---------------------------------------
     #  | var | mean  | se    | p.5   | p.95  |
@@ -73,7 +73,7 @@ module Statsample
       attr_reader :samples_cd
       # General Dominance results
       attr_reader :samples_gd
-      # General average results 
+      # General average results
       attr_reader :samples_ga
       # Name of fields
       attr_reader :fields
@@ -90,22 +90,21 @@ module Statsample
       # Default level of confidence for t calculation
       ALPHA=0.95
       # Create a new Dominance Analysis Bootstrap Object
-      # 
+      #
       # * ds: A Daru::DataFrame object
       # * y_var: Name of dependent variable
-      # * opts: Any other attribute of the class 
+      # * opts: Any other attribute of the class
       def initialize(ds,y_var, opts=Hash.new)
         @ds    = ds
         @y_var = y_var.respond_to?(:to_sym) ? y_var.to_sym : y_var
         @n     = ds.nrows
-        
+
         @n_samples=0
         @alpha=ALPHA
         @debug=false
         if y_var.is_a? Array
           @fields=ds.vectors.to_a - y_var
           @regression_class=Regression::Multiple::MultipleDependent
-          
         else
           @fields=ds.vectors.to_a - [y_var]
           @regression_class=Regression::Multiple::MatrixEngine
@@ -116,7 +115,7 @@ module Statsample
         opts.each{|k,v|
           self.send("#{k}=",v) if self.respond_to? k
         }
-        create_samples_pairs            
+        create_samples_pairs
       end
       # lr_class deprecated
       alias_method :lr_class, :regression_class
@@ -128,14 +127,14 @@ module Statsample
       end
       # Creates n re-samples from original dataset and store result of
       # each sample on @samples_td, @samples_cd, @samples_gd, @samples_ga
-      # 
+      #
       # * number_samples: Number of new samples to add
-      # * n: size of each new sample. If nil, equal to original sample size     
+      # * n: size of each new sample. If nil, equal to original sample size
       def bootstrap(number_samples,n=nil)
         number_samples.times{ |t|
           @n_samples+=1
           puts _("Bootstrap %d of %d") % [t+1, number_samples] if @debug
-          ds_boot=@ds.bootstrap(n)                 
+          ds_boot=@ds.bootstrap(n)
           da_1=DominanceAnalysis.new(ds_boot, @y_var, :regression_class => @regression_class)
 
           da_1.total_dominance.each{|k,v|
@@ -171,49 +170,49 @@ module Statsample
         Distribution::T.p_value(1-((1-@alpha) / 2), @n_samples - 1)
       end
       def report_building(builder) # :nodoc:
-        raise "You should bootstrap first" if @n_samples==0
-        builder.section(:name=>@name) do |generator|
-          generator.text _("Sample size: %d\n") % @n_samples
-          generator.text "t: #{t}\n"
-          generator.text _("Linear Regression Engine: %s") % @regression_class.name
+        # raise "You should bootstrap first" if @n_samples==0
+        # builder.section(:name=>@name) do |generator|
+        #   generator.text _("Sample size: %d\n") % @n_samples
+        #   generator.text "t: #{t}\n"
+        #   generator.text _("Linear Regression Engine: %s") % @regression_class.name
           
-          table=ReportBuilder::Table.new(:name=>"Bootstrap report", :header => [_("pairs"), "sD","Dij", _("SE(Dij)"), "Pij", "Pji", "Pno", _("Reproducibility")])
-          table.row([_("Complete dominance"),"","","","","","",""])
-          table.hr
-          @pairs.each{|pair|
-            std=Daru::Vector.new(@samples_td[pair])
-            ttd=da.total_dominance_pairwise(pair[0],pair[1])
-            table.row(summary_pairs(pair,std,ttd))
-          }
-          table.hr
-          table.row([_("Conditional dominance"),"","","","","","",""])
-          table.hr
-          @pairs.each{|pair|
-            std=Daru::Vector.new(@samples_cd[pair])
-            ttd=da.conditional_dominance_pairwise(pair[0],pair[1])
-            table.row(summary_pairs(pair,std,ttd))
+        #   table=ReportBuilder::Table.new(:name=>"Bootstrap report", :header => [_("pairs"), "sD","Dij", _("SE(Dij)"), "Pij", "Pji", "Pno", _("Reproducibility")])
+        #   table.row([_("Complete dominance"),"","","","","","",""])
+        #   table.hr
+        #   @pairs.each{|pair|
+        #     std=Daru::Vector.new(@samples_td[pair])
+        #     ttd=da.total_dominance_pairwise(pair[0],pair[1])
+        #     table.row(summary_pairs(pair,std,ttd))
+        #   }
+        #   table.hr
+        #   table.row([_("Conditional dominance"),"","","","","","",""])
+        #   table.hr
+        #   @pairs.each{|pair|
+        #     std=Daru::Vector.new(@samples_cd[pair])
+        #     ttd=da.conditional_dominance_pairwise(pair[0],pair[1])
+        #     table.row(summary_pairs(pair,std,ttd))
           
-          }
-          table.hr
-          table.row([_("General Dominance"),"","","","","","",""])
-          table.hr
-          @pairs.each{|pair|
-            std=Daru::Vector.new(@samples_gd[pair])
-            ttd=da.general_dominance_pairwise(pair[0],pair[1])
-            table.row(summary_pairs(pair,std,ttd))
-          }
-          generator.parse_element(table)
+        #   }
+        #   table.hr
+        #   table.row([_("General Dominance"),"","","","","","",""])
+        #   table.hr
+        #   @pairs.each{|pair|
+        #     std=Daru::Vector.new(@samples_gd[pair])
+        #     ttd=da.general_dominance_pairwise(pair[0],pair[1])
+        #     table.row(summary_pairs(pair,std,ttd))
+        #   }
+        #   generator.parse_element(table)
           
-          table=ReportBuilder::Table.new(:name=>_("General averages"), :header=>[_("var"), _("mean"), _("se"), _("p.5"), _("p.95")])
+        #   table=ReportBuilder::Table.new(:name=>_("General averages"), :header=>[_("var"), _("mean"), _("se"), _("p.5"), _("p.95")])
           
-          @fields.each{|f|
-            v=Daru::Vector.new(@samples_ga[f])
-            row=[@ds[f].name, sprintf("%0.3f",v.mean), sprintf("%0.3f",v.sd), sprintf("%0.3f",v.percentil(5)),sprintf("%0.3f",v.percentil(95))]
-            table.row(row)          
-          }
+        #   @fields.each{|f|
+        #     v=Daru::Vector.new(@samples_ga[f])
+        #     row=[@ds[f].name, sprintf("%0.3f",v.mean), sprintf("%0.3f",v.sd), sprintf("%0.3f",v.percentil(5)),sprintf("%0.3f",v.percentil(95))]
+        #     table.row(row)          
+        #   }
           
-          generator.parse_element(table)
-        end
+        #   generator.parse_element(table)
+        # end
       end
       def summary_pairs(pair,std,ttd)
           freqs=std.proportions

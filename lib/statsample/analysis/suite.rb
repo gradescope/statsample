@@ -1,6 +1,6 @@
 module Statsample
   module Analysis
-    class Suite 
+    class Suite
       include Statsample::Shorthand
       attr_accessor :output
       attr_accessor :name
@@ -9,21 +9,21 @@ module Statsample
         if !opts.is_a? Hash
           opts={:name=>opts}
         end
-         
+
         @block=block
         @name=opts[:name] || "Analysis #{Time.now}"
         @attached=[]
         @output=opts[:output] || ::STDOUT
       end
-      # Run the analysis, putting output on 
+      # Run the analysis, putting output on
       def run
          @block.arity<1 ? instance_eval(&@block) : @block.call(self)
       end
-      # Provides a description of the procedure. Only appears as a commentary on 
+      # Provides a description of the procedure. Only appears as a commentary on
       # SuiteReportBuilder outputs
       def desc(d)
         @output.puts("Description:")
-        @output.puts("  #{d}") 
+        @output.puts("  #{d}")
       end
       def echo(*args)
         @output.puts(*args)
@@ -32,18 +32,18 @@ module Statsample
         obj.summary
       end
       def add_to_reportbuilder(rb)
-        SuiteReportBuilder.new({:name=>name, :rb=>rb}, &block)
+        # SuiteReportBuilder.new({:name=>name, :rb=>rb}, &block)
       end
-      
+
       def generate(filename)
-        ar=SuiteReportBuilder.new({:name=>name}, &block)
-        ar.generate(filename)
+        # ar=SuiteReportBuilder.new({:name=>name}, &block)
+        # ar.generate(filename)
       end
       def to_text
-        ar=SuiteReportBuilder.new({:name=>name}, &block)
-        ar.to_text
+        # ar=SuiteReportBuilder.new({:name=>name}, &block)
+        # ar.to_text
       end
-      
+
       def attach(ds)
         @attached.push(ds)
       end
@@ -77,7 +77,7 @@ module Statsample
       def scatterplot(*args)
         show_svg(old_scatterplot(*args).to_svg)
       end
-      
+
       def method_missing(name, *args,&block)
         @attached.reverse.each do |ds|
           return ds[name] if ds.vectors.to_a.include? (name)

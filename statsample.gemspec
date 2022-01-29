@@ -62,7 +62,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'daru', '~> 0.1.6'
   s.add_runtime_dependency 'spreadsheet', '~> 1.1'
-  s.add_runtime_dependency 'reportbuilder', '~> 1.4'
+  # s.add_runtime_dependency 'reportbuilder', '~> 1.4'
   s.add_runtime_dependency 'minimization', '~> 0.2'
   s.add_runtime_dependency 'dirty-memoize', '~> 0.0.4'
   s.add_runtime_dependency 'extendmatrix', '~> 0.4'
